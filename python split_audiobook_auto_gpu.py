@@ -3,6 +3,7 @@ import subprocess
 import whisper
 import torch
 from pathlib import Path
+from tqdm import tqdm
 
 # --- SETTINGS ---
 INPUT_DIR = "."                # Folder with your audiobook files (mp3)
@@ -25,11 +26,11 @@ model = whisper.load_model(MODEL_SIZE).to(device)
 # Global chapter count (continuous numbering)
 chapter_counter = 1
 
-# Sort all mp3 files alphabetically
+# Get sorted list of mp3 files
 audio_files = sorted(Path(INPUT_DIR).glob("*.mp3"))
 
-for audio_file in audio_files:
-    print(f"\nProcessing {audio_file} ...")
+# Process each audiobook file with progress bar
+for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
     # Transcribe with timestamps
     result = model.transcribe(str(audio_file))
 
@@ -46,7 +47,7 @@ for audio_file in audio_files:
     # If no chapters detected, save whole file as one chapter
     if not chapter_times:
         output_file = Path(OUTPUT_DIR) / f"Chapter_{chapter_counter:02}.mp3"
-        print(f"No chapters detected, saving entire file as {output_file}")
+        tqdm.write(f"No chapters detected in {audio_file.name}, saving entire file as {output_file.name}")
         subprocess.run([
             "ffmpeg", "-y", "-i", str(audio_file), "-c", "copy", str(output_file)
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -60,10 +61,9 @@ for audio_file in audio_files:
         end = chapter_times[i + 1][1] if i + 1 < len(chapter_times) else dur
         chapters_with_end.append((num, start, end))
 
-    # Split audio by chapters using ffmpeg
-    for num, start, end in chapters_with_end:
+    # Split audio by chapters using ffmpeg with progress bar
+    for num, start, end in tqdm(chapters_with_end, desc=f"Splitting {audio_file.name}", unit="chapter", leave=False):
         output_file = Path(OUTPUT_DIR) / f"Chapter_{num:02}.mp3"
-        print(f"Saving Chapter {num} from {start:.2f}s to {end:.2f}s as {output_file}")
         subprocess.run([
             "ffmpeg",
             "-y",
