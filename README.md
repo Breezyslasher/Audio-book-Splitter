@@ -7,5 +7,9 @@ Python IdLE
 
 
 Whisper 
-  Torch 
-  tkinter
+
+
+Torch 
+
+
+tkinter
