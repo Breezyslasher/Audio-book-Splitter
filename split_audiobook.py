@@ -103,7 +103,7 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
         log.write("\n")
     # If no chapters detected, save whole file as one chapter
     if not chapter_times:
-        output_file = Path(OUTPUT_DIR) / f"Chapter_{chapter_counter:02}.mp3"
+        output_file = Path(OUTPUT_DIR) / f"Chapter_{chapter_counter:02}.wav"
         tqdm.write(f"No chapters detected in {audio_file.name}, saving entire file as {output_file.name}")
         subprocess.run([
             "ffmpeg", "-y", "-i", str(audio_file), "-c", "copy", str(output_file)
@@ -120,7 +120,7 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
 
     # Split audio by chapters using ffmpeg with progress bar
     for num, start, end in tqdm(chapters_with_end, desc=f"Splitting {audio_file.name}", unit="chapter", leave=False):
-        output_file = Path(OUTPUT_DIR) / f"Chapter_{num:02}.mp3"
+        output_file = Path(OUTPUT_DIR) / f"Chapter_{num:02}.wav"
         subprocess.run([
             "ffmpeg",
             "-y",
