@@ -28,6 +28,8 @@ Linux:
     sudo apt install ffmpeg
 
 Windows:
+ 
+ 
 Download FFmpeg from https://ffmpeg.org/download.html and add it to your PATH environment variable.
 
 Mac:
