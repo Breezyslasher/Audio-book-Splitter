@@ -11,7 +11,7 @@ class AudiobookSplitterApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Audiobook Chapter Splitter")
-        self.geometry("600x400")
+        self.geometry("600x500")
 
         # Variables
         self.input_dir = tk.StringVar()
