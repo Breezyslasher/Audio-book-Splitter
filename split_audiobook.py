@@ -1,3 +1,4 @@
+
 import re
 import subprocess
 import whisper
@@ -9,12 +10,16 @@ from tqdm import tqdm
 INPUT_DIR = "."                # Folder with your audiobook files (mp3)
 OUTPUT_DIR = "chapters"        # Folder to save chapters
 MODEL_SIZE = "base"            # tiny, base, small, medium, large
+LOG_FILE = Path(OUTPUT_DIR) / "chapters_detected.txt"
 
 # Regex to detect chapter names
 pattern = re.compile(r"\b(chapter|part|prologue|epilogue)\s+(\d+|\w+)\b", re.IGNORECASE)
 
 # Create output folder if not exists
 Path(OUTPUT_DIR).mkdir(exist_ok=True)
+
+# Prepare log file
+LOG_FILE.write_text("=== Chapter Detection Log ===\n\n")
 
 # Detect device (GPU or CPU)
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -34,15 +39,21 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
     # Transcribe with timestamps
     result = model.transcribe(str(audio_file))
 
+    LOG_FILE.write_text  # Not needed here — just reminder: we append later
+
     # Find chapter start times
     chapter_times = []
-    for segment in result['segments']:
-        text = segment['text'].strip()
-        match = pattern.search(text)
-        if match:
-            start_time = segment['start']
-            chapter_times.append((chapter_counter, start_time))
-            chapter_counter += 1
+    with LOG_FILE.open("a", encoding="utf-8") as log:
+        log.write(f"--- {audio_file.name} ---\n")
+        for segment in result['segments']:
+            text = segment['text'].strip()
+            match = pattern.search(text)
+            if match:
+                start_time = segment['start']
+                chapter_times.append((chapter_counter, start_time))
+                log.write(f"[{start_time:.2f}s] {text}\n")
+                chapter_counter += 1
+        log.write("\n")
 
     # If no chapters detected, save whole file as one chapter
     if not chapter_times:
@@ -75,3 +86,4 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 print(f"\n✅ Done! Chapters saved in '{OUTPUT_DIR}' folder.")
+print(f"📄 Log of detected chapters saved in: {LOG_FILE}")
