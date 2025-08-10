@@ -4,24 +4,46 @@ import whisper
 import torch
 from pathlib import Path
 from tqdm import tqdm
+import tkinter as tk
+from tkinter import filedialog
 
-# --- SETTINGS ---
-INPUT_DIR = "."                # Folder with your audiobook files (mp3)
-OUTPUT_DIR = "chapters"        # Folder to save chapters
-MODEL_SIZE = "base"            # tiny, base, small, medium, large
-LOG_FILE = Path(OUTPUT_DIR) / "chapters_detected.txt"
+# --- GUI for folder selection ---
+root = tk.Tk()
+root.withdraw()  # Hide main window
 
-input_files = sorted(Path(INPUT_DIR).glob("*.mp3"))
+print("Select folder containing MP3 audiobook files...")
+INPUT_DIR = Path(filedialog.askdirectory(title="Select MP3 Input Folder"))
+if not INPUT_DIR:
+    print("No input folder selected, exiting.")
+    exit(1)
+
+print("Select folder to save chapter files...")
+OUTPUT_DIR = Path(filedialog.askdirectory(title="Select Output Folder"))
+if not OUTPUT_DIR:
+    print("No output folder selected, exiting.")
+    exit(1)
+
+print(f"Input folder: {INPUT_DIR}")
+print(f"Output folder: {OUTPUT_DIR}")
+
+MODEL_SIZE = "large"
+LOG_FILE = OUTPUT_DIR / "chapters_detected.txt"
+
+# The rest of your script here, replacing
+# INPUT_DIR and OUTPUT_DIR with the selected folders
+# ...
+
+input_files = sorted(INPUT_DIR.glob("*.mp3"))
 if not input_files:
     print("No MP3 files found to combine!")
     exit(1)
 
-filelist_path = Path(INPUT_DIR) / "filelist.txt"
+filelist_path = INPUT_DIR / "filelist.txt"
 with filelist_path.open("w", encoding="utf-8") as f:
     for mp3_file in input_files:
         f.write(f"file '{mp3_file.as_posix()}'\n")
 
-combined_path = Path(INPUT_DIR) / "audiobook.wav"
+combined_path = INPUT_DIR / "audiobook.wav"
 
 print("Combining all mp3 files into audiobook.wav...")
 combine_cmd = [
@@ -51,12 +73,11 @@ pattern = re.compile(
 
 def sanitize_filename(s):
     s = s.strip()
-    s = re.sub(r'[\\/*?:"<>|]', '_', s)  # replace invalid filename chars with underscore
-    s = re.sub(r'\s+', ' ', s)  # collapse multiple spaces
+    s = re.sub(r'[\\/*?:"<>|]', '_', s)
+    s = re.sub(r'\s+', ' ', s)
     return s
 
-Path(OUTPUT_DIR).mkdir(exist_ok=True)
-
+OUTPUT_DIR.mkdir(exist_ok=True)
 LOG_FILE.write_text("=== Chapter Detection Log ===\n\n")
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -93,7 +114,7 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
         log.write("\n")
 
     if not chapter_times:
-        output_file = Path(OUTPUT_DIR) / "Full_Audiobook.wav"
+        output_file = OUTPUT_DIR / "Full_Audiobook.wav"
         tqdm.write(f"No chapters detected in {audio_file.name}, saving entire file as {output_file.name}")
         subprocess.run([
             "ffmpeg", "-y", "-i", str(audio_file), "-c", "copy", str(output_file)
@@ -107,7 +128,7 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
         chapters_with_end.append((num, start, end))
 
     for (num, start, end), chapter_name in zip(chapters_with_end, chapter_names):
-        output_file = Path(OUTPUT_DIR) / f"{chapter_name}.wav"
+        output_file = OUTPUT_DIR / f"{chapter_name}.wav"
         subprocess.run([
             "ffmpeg",
             "-y",
