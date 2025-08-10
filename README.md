@@ -23,9 +23,9 @@ pip install torch tqdm git+https://github.com/openai/whisper.git
 ### 3. Install FFmpeg
 The script uses FFmpeg to combine and split audio files.
 
-    Linux:
+Linux:
 
-sudo apt install ffmpeg
+    sudo apt install ffmpeg
 
 Windows:
 Download FFmpeg from https://ffmpeg.org/download.html and add it to your PATH environment variable.
