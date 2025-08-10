@@ -12,6 +12,30 @@ OUTPUT_DIR = "chapters"        # Folder to save chapters
 MODEL_SIZE = "base"            # tiny, base, small, medium, large
 LOG_FILE = Path(OUTPUT_DIR) / "chapters_detected.txt"
 
+
+input_files = sorted(Path(INPUT_DIR).glob("*.mp3"))
+if not input_files:
+    print("No MP3 files found to combine!")
+    exit(1)
+
+filelist_path = Path(INPUT_DIR) / "filelist.txt"
+with filelist_path.open("w", encoding="utf-8") as f:
+    for mp3_file in input_files:
+        f.write(f"file '{mp3_file.as_posix()}'\n")
+
+combined_path = Path(INPUT_DIR) / "audiobook.wav"
+
+print("Combining all mp3 files into audiobook.wav...")
+combine_cmd = [
+    "ffmpeg", "-f", "concat", "-safe", "0", "-i",
+    str(filelist_path), "-c:a", "pcm_s16le", "audiobook.wav"
+]
+result = subprocess.run(combine_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+if result.returncode != 0:
+    print("Error combining files:", result.stderr.decode())
+    exit(1)
+print("Combine complete.\n")
+
 # Regex to detect chapter names
 pattern = re.compile(
     r"\b(?:chapter|part|prologue|epilogue)\s+("
@@ -44,8 +68,12 @@ model = whisper.load_model(MODEL_SIZE).to(device)
 # Global chapter count (continuous numbering)
 chapter_counter = 1
 
-# Get sorted list of mp3 files
-audio_files = sorted(Path(INPUT_DIR).glob("*.mp3"))
+
+# Now process only combined audiobook.mp3
+audio_files = [combined_path]
+for audio_file in audio_files:
+    # Your processing code here
+    print(f"Processing {audio_file}")
 
 # Process each audiobook file with progress bar
 for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
