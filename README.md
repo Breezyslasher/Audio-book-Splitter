@@ -15,7 +15,15 @@ tkinter
 ## Setup
 
 ### 1. Install Python
- https://www.python.org/downloads/
+Make sure you have Python 3.8 or newer installed on your system.
+
+    (https://www.python.org/downloads/)
+
+Verify installation:
+
+    python --version
+
+ 
  
 ### 2. Install Required Python Packages
     pip install torch tqdm git+https://github.com/openai/whisper.git
