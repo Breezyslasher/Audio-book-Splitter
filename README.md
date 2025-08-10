@@ -53,3 +53,9 @@ Mac:
 Verify FFmpeg is installed:
 
     ffmpeg -version
+
+### 4. Prepare Your Audiobook Files
+
+Place all your MP3 audiobook files in a single folder (e.g., ./audiobook_mp3s).
+
+### 5. Run the Script
