@@ -64,11 +64,11 @@ When the script is run for the first time, it will download the whisper model.
 ## Troubleshooting
 
 ###1. Slow Download of Model
-You can manually download the model from 
+You can manually download the model from https://github.com/openai/whisper/blob/main/whisper/__init__.py 
 
 
 Put the downloaded model in
     
     Windows: C:\Users\<username>\.cache\whisper\<model>
-    Linux:   /home/<username>/.cache/whisper
+    Linux: /home/<username>/.cache/whisper
 
