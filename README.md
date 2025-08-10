@@ -70,5 +70,5 @@ You can manually download the model from https://github.com/openai/whisper/blob/
 Put the downloaded model in
     
     Windows: C:\Users\<username>\.cache\whisper\<model>
-    Linux: /home/<username>/.cache/whisper
+    Linux: /home/<username>/.cache/whisper/<model>
 
