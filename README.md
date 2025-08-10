@@ -18,7 +18,7 @@ tkinter
  https://www.python.org/downloads/
  
 ### 2. Install Required Python Packages
-pip install torch tqdm git+https://github.com/openai/whisper.git
+    pip install torch tqdm git+https://github.com/openai/whisper.git
 
 ### 3. Install FFmpeg
 The script uses FFmpeg to combine and split audio files.
