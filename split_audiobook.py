@@ -256,6 +256,11 @@ class AudiobookSplitterApp(tk.Tk):
             # Show the "Open Output Folder" button now
             self.open_folder_btn.pack()  # Show the button
             self.open_folder_btn.config(state=tk.NORMAL)
+            try:
+                combined_path.unlink()
+                self.log("Deleted temporary combined file: audiobook.wav")
+            except Exception as e:
+                self.log(f"Could not delete audiobook.wav: {e}")
         except Exception as e:
             self.log(f"Error: {e}")
             self.status_text.set("Error occurred.")
