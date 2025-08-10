@@ -59,8 +59,16 @@ Verify FFmpeg is installed:
 Place all your MP3 audiobook files in a single folder (e.g., ./audiobook_mp3s).
 
 ### 5. Run the Script
-When the script is run for the first time it will download the whisper model.
+When the script is run for the first time, it will download the whisper model.
 
 ## Troubleshooting
 
 ###1. Slow Download of Model
+You can manually download the model from 
+
+
+Put the downloaded model in
+    
+    Windows: C:\Users\<username>\.cache\whisper\<model>
+    Linux:   /home/<username>/.cache/whisper
+
