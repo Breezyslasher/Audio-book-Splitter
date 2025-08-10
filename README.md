@@ -38,4 +38,4 @@ Mac:
 
 Verify FFmpeg is installed:
 
-ffmpeg -version
+    ffmpeg -version
