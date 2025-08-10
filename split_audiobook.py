@@ -13,7 +13,20 @@ MODEL_SIZE = "base"            # tiny, base, small, medium, large
 LOG_FILE = Path(OUTPUT_DIR) / "chapters_detected.txt"
 
 # Regex to detect chapter names
-pattern = re.compile(r"\b(chapter|part|prologue|epilogue)\s+(\d+|\w+)\b", re.IGNORECASE)
+pattern = re.compile(
+    r"\b(?:chapter|part|prologue|epilogue)\s+("
+    r"([1-9]|[1-4][0-9]|50)|"                        # digits 1-50
+    r"(one|two|three|four|five|six|seven|eight|nine|ten|"
+    r"eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
+    r"twenty|twenty-one|twenty-two|twenty-three|twenty-four|twenty-five|"
+    r"twenty-six|twenty-seven|twenty-eight|twenty-nine|thirty|"
+    r"thirty-one|thirty-two|thirty-three|thirty-four|thirty-five|"
+    r"thirty-six|thirty-seven|thirty-eight|thirty-nine|forty|"
+    r"forty-one|forty-two|forty-three|forty-four|forty-five|"
+    r"forty-six|forty-seven|forty-eight|forty-nine|fifty)"
+    r")\b",
+    re.IGNORECASE
+)
 
 # Create output folder if not exists
 Path(OUTPUT_DIR).mkdir(exist_ok=True)
@@ -45,16 +58,21 @@ for audio_file in tqdm(audio_files, desc="Audio files", unit="file"):
     chapter_times = []
     with LOG_FILE.open("a", encoding="utf-8") as log:
         log.write(f"--- {audio_file.name} ---\n")
+        first_chapter = True
         for segment in result['segments']:
             text = segment['text'].strip()
             match = pattern.search(text)
             if match:
-                start_time = segment['start']
+                # If this is the very first chapter in the whole book, start from 0.0
+                if first_chapter:
+                    start_time = 0.0
+                    first_chapter = False
+                else:
+                    start_time = segment['start']
                 chapter_times.append((chapter_counter, start_time))
                 log.write(f"[{start_time:.2f}s] {text}\n")
                 chapter_counter += 1
         log.write("\n")
-
     # If no chapters detected, save whole file as one chapter
     if not chapter_times:
         output_file = Path(OUTPUT_DIR) / f"Chapter_{chapter_counter:02}.mp3"
