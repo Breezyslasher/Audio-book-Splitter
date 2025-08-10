@@ -17,7 +17,7 @@ tkinter
 ### 1. Install Python
 Make sure you have Python 3.8 or newer installed on your system.
 
-    (https://www.python.org/downloads/)
+    https://www.python.org/downloads/
 
 Verify installation:
 
@@ -26,7 +26,23 @@ Verify installation:
  
  
 ### 2. Install Required Python Packages
+The script needs:
+
+    whisper (OpenAI’s Whisper ASR model)
+
+    torch (PyTorch for running Whisper)
+
+    tqdm (progress bar)
+
+Install them with:
+
     pip install torch tqdm git+https://github.com/openai/whisper.git
+
+Note:
+
+For GPU support, install the correct PyTorch version from pytorch.org matching your CUDA version (e.g., CUDA 12.4 for your 2060 Super).
+
+On CPU-only machines, the above will install CPU PyTorch.
 
 ### 3. Install FFmpeg
 The script uses FFmpeg to combine and split audio files.
