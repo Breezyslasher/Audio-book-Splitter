@@ -28,11 +28,11 @@ Verify installation:
 ### 2. Install Required Python Packages
 The script needs:
 
-    whisper (OpenAI’s Whisper ASR model)
+whisper (OpenAI’s Whisper ASR model)
 
-    torch (PyTorch for running Whisper)
+torch (PyTorch for running Whisper)
 
-    tqdm (progress bar)
+tqdm (progress bar)
 
 Install them with:
 
@@ -40,7 +40,7 @@ Install them with:
 
 Note:
 
-For GPU support, install the correct PyTorch version from pytorch.org matching your CUDA version (e.g., CUDA 12.4 for your 2060 Super).
+For GPU support, install the correct PyTorch version from pytorch.org matching your CUDA version 
 
 On CPU-only machines, the above will install CPU PyTorch.
 
