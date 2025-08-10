@@ -12,4 +12,7 @@ Torch
 
 
 tkinter
-### Step One
+## Setup
+
+### 1. Install Python
+ https://www.python.org/downloads/
