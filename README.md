@@ -3,7 +3,4 @@ This program is used to split large audiobooks into individual chapters. The too
 like chapter 20 or chapter ten
 
 ## requirements 
-Python IdLE
-Whisper
-Torch
-tkinter
+Python IdLE, Whisper ,Torch ,tkinter
