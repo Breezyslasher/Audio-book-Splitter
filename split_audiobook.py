@@ -1,5 +1,6 @@
 import re
 import subprocess
+import platform
 import whisper
 import torch
 from pathlib import Path
@@ -11,7 +12,7 @@ class AudiobookSplitterApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Audiobook Chapter Splitter")
-        self.geometry("600x500")
+        self.geometry("800x600")
 
         # Variables
         self.input_dir = tk.StringVar()
@@ -37,6 +38,27 @@ class AudiobookSplitterApp(tk.Tk):
             r")\b",
             re.IGNORECASE
         )
+    def open_output_folder(self):
+        path = self.output_dir.get()
+        if not path:
+            messagebox.showerror("Error", "Output folder path is not set.")
+            return
+        path = Path(path)
+        if not path.exists():
+            messagebox.showerror("Error", "Output folder does not exist.")
+            return
+
+        system = platform.system()
+        try:
+            if system == "Windows":
+                subprocess.Popen(f'explorer "{path}"')
+            elif system == "Linux":
+                subprocess.Popen(["xdg-open", str(path)])
+            else:
+                messagebox.showinfo("Unsupported OS", f"Opening folder not supported on {system}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to open folder: {e}")
+
 
     def create_widgets(self):
         frm = ttk.Frame(self, padding=10)
@@ -56,6 +78,15 @@ class AudiobookSplitterApp(tk.Tk):
         ttk.Entry(output_frame, textvariable=self.output_dir).pack(side=tk.LEFT, fill=tk.X, expand=True)
         ttk.Button(output_frame, text="Browse", command=self.browse_output).pack(side=tk.LEFT)
 
+        # Model selector label
+        ttk.Label(frm, text="Select Whisper Model:").pack(anchor=tk.W, pady=(0,4))
+
+        # Model selector combobox
+        self.model_var = tk.StringVar(value="base")
+        model_combo = ttk.Combobox(frm, textvariable=self.model_var, state="readonly",
+                           values=["tiny", "base", "small", "medium", "large"])
+        model_combo.pack(fill=tk.X, pady=(0, 15))
+        
         # Start button
         self.start_btn = ttk.Button(frm, text="Start Splitting", command=self.start_splitting)
         self.start_btn.pack(pady=10)
@@ -71,6 +102,13 @@ class AudiobookSplitterApp(tk.Tk):
         # Status label
         self.status_label = ttk.Label(frm, textvariable=self.status_text)
         self.status_label.pack(anchor=tk.W, pady=2)
+
+        # Open output folder button (hidden initially)
+        self.open_folder_btn = ttk.Button(frm, text="Open Output Folder", command=self.open_output_folder)
+        self.open_folder_btn.pack(pady=5, anchor=tk.E)
+        self.open_folder_btn.pack_forget()  # Hide initially
+
+        
 
     def browse_input(self):
         folder = filedialog.askdirectory(title="Select Input Folder")
@@ -95,6 +133,7 @@ class AudiobookSplitterApp(tk.Tk):
         return s
 
     def start_splitting(self):
+        self.open_folder_btn.pack_forget()  # Hide the button each time before starting
         input_path = self.input_dir.get()
         output_path = self.output_dir.get()
         if not input_path or not output_path:
@@ -145,9 +184,10 @@ class AudiobookSplitterApp(tk.Tk):
             log_file.write_text("=== Chapter Detection Log ===\n\n")
 
             device = "cuda" if torch.cuda.is_available() else "cpu"
-            self.log(f"Running Whisper on device: {device}")
-            self.status_text.set("Loading Whisper model...")
-            self.model = whisper.load_model("large").to(device)
+            model_choice = self.model_var.get()
+            self.log(f"Loading Whisper model '{model_choice}'...")
+            self.status_text.set(f"Loading Whisper model '{model_choice}'...")
+            self.model = whisper.load_model(model_choice).to(device)
 
             self.chapter_counter = 1
 
@@ -173,7 +213,7 @@ class AudiobookSplitterApp(tk.Tk):
                         chapter_names.append(chapter_title)
 
                         log.write(f"[{start_time:.2f}s] {text}\n")
-                        self.log(f"Found chapter: {text} at {start_time:.2f}s")
+                        self.log(f"Found chapter: {text}")
                         self.chapter_counter += 1
                 log.write("\n")
 
@@ -213,7 +253,9 @@ class AudiobookSplitterApp(tk.Tk):
             
             self.status_text.set("All chapters saved!")
             self.start_btn.config(state=tk.NORMAL)
-
+            # Show the "Open Output Folder" button now
+            self.open_folder_btn.pack()  # Show the button
+            self.open_folder_btn.config(state=tk.NORMAL)
         except Exception as e:
             self.log(f"Error: {e}")
             self.status_text.set("Error occurred.")
