@@ -78,6 +78,15 @@ class AudiobookSplitterApp(tk.Tk):
         output_frame.pack(fill=tk.X, pady=2)
         ttk.Entry(output_frame, textvariable=self.output_dir).pack(side=tk.LEFT, fill=tk.X, expand=True)
         ttk.Button(output_frame, text="Browse", command=self.browse_output).pack(side=tk.LEFT)
+        
+        # File type selector label
+        ttk.Label(frm, text="Select Input File Type:").pack(anchor=tk.W, pady=(0,4))
+
+        # File type selector combobox
+        self.filetype_var = tk.StringVar(value="mp3")
+        filetype_combo = ttk.Combobox(frm, textvariable=self.filetype_var, state="readonly",
+                              values=["mp3", "wav", "flac", "m4a", "aac"])
+        filetype_combo.pack(fill=tk.X, pady=(0, 15))
 
         # Model selector label
         ttk.Label(frm, text="Select Whisper Model:").pack(anchor=tk.W, pady=(0,4))
@@ -153,17 +162,19 @@ class AudiobookSplitterApp(tk.Tk):
 
     def split_audiobook(self, input_dir, output_dir):
         try:
-            input_files = sorted(input_dir.glob("*.mp3"))
+            ext = self.filetype_var.get()
+            input_files = sorted(input_dir.glob(f"*.{ext}"))
             if not input_files:
-                self.log("No MP3 files found in input folder!")
-                self.status_text.set("No MP3 files found.")
+                self.log(f"No {ext.upper()} files found in input folder!")
+                self.status_text.set(f"No {ext.upper()} files found.")
                 self.start_btn.config(state=tk.NORMAL)
                 return
 
+
             filelist_path = input_dir / "filelist.txt"
             with filelist_path.open("w", encoding="utf-8") as f:
-                for mp3_file in input_files:
-                    f.write(f"file '{mp3_file.as_posix()}'\n")
+                for audio_file in input_files:
+                    f.write(f"file '{audio_file.as_posix()}'\n")
 
             combined_path = input_dir / "audiobook.wav"
 
