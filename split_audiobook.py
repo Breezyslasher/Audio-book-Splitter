@@ -79,14 +79,15 @@ class AudiobookSplitterApp(tk.Tk):
         ttk.Entry(output_frame, textvariable=self.output_dir).pack(side=tk.LEFT, fill=tk.X, expand=True)
         ttk.Button(output_frame, text="Browse", command=self.browse_output).pack(side=tk.LEFT)
         
-        # File type selector label
-        ttk.Label(frm, text="Select Input File Type:").pack(anchor=tk.W, pady=(0,4))
+       # Output file format label
+        ttk.Label(frm, text="Select output file format:").pack(anchor=tk.W, pady=(0,4))
 
-        # File type selector combobox
-        self.filetype_var = tk.StringVar(value="mp3")
-        filetype_combo = ttk.Combobox(frm, textvariable=self.filetype_var, state="readonly",
-                              values=["mp3", "wav", "flac", "m4a", "aac"])
-        filetype_combo.pack(fill=tk.X, pady=(0, 15))
+        # Output format selector combobox
+        self.output_format_var = tk.StringVar(value="wav")
+        output_format_combo = ttk.Combobox(frm, textvariable=self.output_format_var, state="readonly",
+                                   values=["wav", "mp3", "m4a", "flac", "aac", "ogg"])
+        output_format_combo.pack(fill=tk.X, pady=(0, 15))
+
 
         # Model selector label
         ttk.Label(frm, text="Select Whisper Model:").pack(anchor=tk.W, pady=(0,4))
@@ -162,23 +163,30 @@ class AudiobookSplitterApp(tk.Tk):
 
     def split_audiobook(self, input_dir, output_dir):
         try:
-            ext = self.filetype_var.get()
-            input_files = sorted(input_dir.glob(f"*.{ext}"))
+            audio_extensions = ["mp3", "wav", "flac", "m4a", "aac", "ogg"]
+
+            input_files = []
+            for ext in audio_extensions:
+                input_files.extend(input_dir.glob(f"*.{ext}"))
+
+            input_files = sorted(input_files)
+
             if not input_files:
-                self.log(f"No {ext.upper()} files found in input folder!")
-                self.status_text.set(f"No {ext.upper()} files found.")
+                self.log("No audio files found in input folder!")
+                self.status_text.set("No audio files found.")
                 self.start_btn.config(state=tk.NORMAL)
                 return
 
 
+
             filelist_path = input_dir / "filelist.txt"
             with filelist_path.open("w", encoding="utf-8") as f:
-                for audio_file in input_files:
-                    f.write(f"file '{audio_file.as_posix()}'\n")
+                for mp3_file in input_files:
+                    f.write(f"file '{mp3_file.as_posix()}'\n")
 
             combined_path = input_dir / "audiobook.wav"
 
-            self.log("Combining MP3 files into audiobook.wav...")
+            self.log("Combining All files into audiobook.wav...")
             combine_cmd = [
                 "ffmpeg", "-f", "concat", "-safe", "0", "-i",
                 str(filelist_path), "-c:a", "pcm_s16le", str(combined_path)
@@ -257,7 +265,8 @@ class AudiobookSplitterApp(tk.Tk):
             self.progress['maximum'] = total_chapters
 
             for idx, ((num, start, end), chapter_name) in enumerate(zip(chapters_with_end, chapter_names), 1):
-                output_file = output_dir / f"{chapter_name}.wav"
+                output_ext = self.output_format_var.get()
+                output_file = output_dir / f"{chapter_name}.{output_ext}"
                 subprocess.run([
                     "ffmpeg",
                     "-y",
@@ -267,7 +276,7 @@ class AudiobookSplitterApp(tk.Tk):
                     "-c", "copy",
                     str(output_file)
                 ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                self.log(f"Saved chapter: {chapter_name}.wav")
+                self.log(f"Saved chapter: {chapter_name}.{output_ext}")
                 self.progress['value'] = idx
                 self.status_text.set(f"Saved chapter {idx} of {total_chapters}")
             
