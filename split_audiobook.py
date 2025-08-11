@@ -210,7 +210,15 @@ class AudiobookSplitterApp(tk.Tk):
                         first_chapter = False
 
                         chapter_times.append((self.chapter_counter, start_time))
-                        chapter_title = self.sanitize_filename(text)
+
+                        # Extract only "Chapter X" if present
+                        chapter_match = re.search(r'(Chapter\s+\d+)', text, re.IGNORECASE)
+                        if chapter_match:
+                            chapter_title = chapter_match.group(1)
+                        else:
+                            chapter_title = f"Chapter {self.chapter_counter}"
+
+                        chapter_title = self.sanitize_filename(chapter_title)
                         chapter_names.append(chapter_title)
 
                         log.write(f"[{start_time:.2f}s] {text}\n")
