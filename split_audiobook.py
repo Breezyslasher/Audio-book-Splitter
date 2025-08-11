@@ -66,7 +66,7 @@ class AudiobookSplitterApp(tk.Tk):
         frm.pack(fill=tk.BOTH, expand=True)
 
         # Input folder
-        ttk.Label(frm, text="Input folder (MP3s):").pack(anchor=tk.W)
+        ttk.Label(frm, text="Input folder:").pack(anchor=tk.W)
         input_frame = ttk.Frame(frm)
         input_frame.pack(fill=tk.X, pady=2)
         ttk.Entry(input_frame, textvariable=self.input_dir).pack(side=tk.LEFT, fill=tk.X, expand=True)
